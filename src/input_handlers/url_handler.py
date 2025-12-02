@@ -35,6 +35,15 @@ class URLHandler:
             Dict containing extracted content and metadata
         """
         try:
+            # Check BeautifulSoup availability first
+            bs4_check = self.check_bs4_availability()
+            if not bs4_check['available']:
+                return {
+                    'status': 'error',
+                    'error': bs4_check['error'],
+                    'input_type': 'url'
+                }
+
             # Validate URL
             validation = self._validate_url(url)
             if not validation['valid']:
@@ -99,6 +108,19 @@ class URLHandler:
                 content_response['url']
             )
             
+            return {
+                'status': 'success',
+                'input_type': 'url',
+                'url': content_response['url'],
+                'title': extracted_content.get('title', ''),
+                'extracted_content': extracted_content,
+                'metadata': {
+                    'http_status': content_response.get('http_status'),
+                    'content_type': content_response.get('content_type'),
+                    'fetch_time': content_response.get('fetch_time')
+                }
+            }
+            
             # Combine all information
             result = {
                 'status': 'success',
@@ -120,6 +142,13 @@ class URLHandler:
                 'input_type': 'url'
             }
     
+    def check_bs4_availability(self) -> Dict[str, bool]:
+        """Check if BeautifulSoup is available"""
+        return {
+            'available': self.bs4_available,
+            'error': None if self.bs4_available else 'BeautifulSoup4 is not installed. Install with: pip install beautifulsoup4'
+        }
+
     def _validate_url(self, url: str) -> Dict[str, Any]:
         """Validate URL format and accessibility"""
         try:

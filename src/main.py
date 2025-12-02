@@ -20,6 +20,7 @@ from data_manager import DataManager
 from huggingface_predictor import HuggingFacePredictor
 from gemini_predictor import GeminiPredictor
 from flask import Flask, request, jsonify, render_template
+from bs4 import BeautifulSoup
 
 
 class FakeNewsDetector:
@@ -36,6 +37,8 @@ class FakeNewsDetector:
         self.data_manager = DataManager(data_dir)
         self.hf_predictor = HuggingFacePredictor()
         self.gemini_predictor = GeminiPredictor()
+
+        self.BeautifulSoup = BeautifulSoup()
         
         # Flask app initialization
         self.app = Flask(__name__)
@@ -282,19 +285,17 @@ class FakeNewsDetector:
                         'red_flags': ['URL processing error']
                     }
                 
-                # Extract article content from HTML
-                soup = self.BeautifulSoup(url_result['html'], 'html.parser')
+                # Extract article content from the URL result
+                if 'extracted_content' not in url_result:
+                    return {
+                        'status': 'error',
+                        'prediction': 'ERROR',
+                        'probability': 0,
+                        'explanation': 'Content extraction failed from URL',
+                        'red_flags': ['Content extraction error']
+                    }
                 
-                # Get main content
-                article_content = ""
-                article = soup.find('article') or soup.find(class_=['article-body', 'article-content'])
-                if article:
-                    article_content = article.get_text(strip=True)
-                else:
-                    # Fallback to main content
-                    main = soup.find('main')
-                    if main:
-                        article_content = main.get_text(strip=True)
+                article_content = url_result.get('extracted_content', {}).get('main_content', '')
                 
                 if not article_content:
                     return {
