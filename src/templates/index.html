@@ -203,13 +203,140 @@
       }
 
       .red-flags {
-        margin-top: 1rem;
+        margin-top: 1.5rem;
+        padding: 1.25rem;
+        background: linear-gradient(
+          135deg,
+          rgba(239, 68, 68, 0.1) 0%,
+          rgba(185, 28, 28, 0.05) 100%
+        );
+        border-radius: 12px;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      .red-flags h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #fca5a5;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+      }
+
+      .red-flags h3::before {
+        content: "⚠️";
+        font-size: 1.2rem;
+      }
+
+      .issues-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.5rem;
+        height: 1.5rem;
+        padding: 0 0.5rem;
+        background-color: #ef4444;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 9999px;
+        margin-left: 0.5rem;
+      }
+
+      .red-flags.no-issues .issues-badge {
+        background-color: #22c55e;
+      }
+
+      #red-flags-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0.75rem;
       }
 
       .red-flag-item {
-        color: #ef4444;
-        margin-bottom: 0.5rem;
-        margin-left: 0.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.875rem 1rem;
+        background-color: rgba(15, 23, 42, 0.6);
+        border-radius: 8px;
+        border-left: 3px solid #ef4444;
+        color: #fecaca;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        transition: all 0.2s ease;
+      }
+
+      .red-flag-item:hover {
+        background-color: rgba(239, 68, 68, 0.15);
+        transform: translateX(4px);
+      }
+
+      .red-flag-item::before {
+        content: "🚩";
+        font-size: 1rem;
+        flex-shrink: 0;
+      }
+
+      /* No issues state */
+      .red-flags.no-issues {
+        background: linear-gradient(
+          135deg,
+          rgba(34, 197, 94, 0.1) 0%,
+          rgba(22, 163, 74, 0.05) 100%
+        );
+        border: 1px solid rgba(34, 197, 94, 0.3);
+      }
+
+      .red-flags.no-issues h3 {
+        color: #86efac;
+        border-bottom-color: rgba(34, 197, 94, 0.2);
+      }
+
+      .red-flags.no-issues h3::before {
+        content: "✅";
+      }
+
+      .no-issues-message {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background-color: rgba(34, 197, 94, 0.1);
+        border-radius: 8px;
+        color: #bbf7d0;
+        font-size: 0.95rem;
+      }
+
+      .no-issues-message::before {
+        content: "👍";
+        font-size: 1.2rem;
+      }
+
+      /* Severity indicators */
+      .red-flag-item.high-severity {
+        border-left-color: #dc2626;
+        background-color: rgba(220, 38, 38, 0.1);
+      }
+
+      .red-flag-item.medium-severity {
+        border-left-color: #f59e0b;
+      }
+
+      .red-flag-item.medium-severity::before {
+        content: "⚡";
+      }
+
+      .red-flag-item.low-severity {
+        border-left-color: #eab308;
+      }
+
+      .red-flag-item.low-severity::before {
+        content: "💡";
       }
 
       .loading {
@@ -509,7 +636,6 @@
         </p>
       </header>
 
-    
       <div class="input-section">
         <div class="input-tabs">
           <button class="tab-button active" data-tab="text">Text</button>
@@ -573,7 +699,10 @@
         </div>
 
         <div class="red-flags">
-          <h3>Potential Issues:</h3>
+          <h3>
+            Potential Issues:
+            <span id="issues-count" class="issues-badge"></span>
+          </h3>
           <ul id="red-flags-list"></ul>
         </div>
       </div>
@@ -617,9 +746,7 @@
           </div>
         </div>
       </section> -->
-      
     </div>
-    
 
     <footer>
       <p></p>
@@ -701,14 +828,78 @@
 
         document.getElementById("explanation").textContent = result.explanation;
 
+        // Handle red flags / potential issues
         const flagsList = document.getElementById("red-flags-list");
+        const redFlagsContainer = document.querySelector(".red-flags");
+        const redFlagsTitle = redFlagsContainer.querySelector("h3");
         flagsList.innerHTML = "";
-        result.red_flags.forEach((flag) => {
-          const li = document.createElement("li");
-          li.textContent = flag;
-          li.className = "red-flag-item";
-          flagsList.appendChild(li);
-        });
+
+        // High severity keywords
+        const highSeverityKeywords = [
+          "manipulation",
+          "fabricated",
+          "false",
+          "misleading",
+          "propaganda",
+          "doctored",
+          "deceptive",
+        ];
+        // Medium severity keywords
+        const mediumSeverityKeywords = [
+          "unverified",
+          "bias",
+          "sensational",
+          "exaggerated",
+          "inconsistent",
+          "clickbait",
+        ];
+
+        // Check if there are meaningful red flags
+        const hasIssues =
+          result.red_flags &&
+          result.red_flags.length > 0 &&
+          !result.red_flags.includes("No specific red flags identified");
+
+        if (hasIssues) {
+          redFlagsContainer.classList.remove("no-issues");
+          redFlagsTitle.innerHTML = `Potential Issues Detected: <span id="issues-count" class="issues-badge">${result.red_flags.length}</span>`;
+
+          result.red_flags.forEach((flag) => {
+            const li = document.createElement("li");
+            li.textContent = flag;
+            li.className = "red-flag-item";
+
+            // Determine severity based on content
+            const flagLower = flag.toLowerCase();
+            if (
+              highSeverityKeywords.some((keyword) =>
+                flagLower.includes(keyword)
+              )
+            ) {
+              li.classList.add("high-severity");
+            } else if (
+              mediumSeverityKeywords.some((keyword) =>
+                flagLower.includes(keyword)
+              )
+            ) {
+              li.classList.add("medium-severity");
+            } else {
+              li.classList.add("low-severity");
+            }
+
+            flagsList.appendChild(li);
+          });
+        } else {
+          // No issues found
+          redFlagsContainer.classList.add("no-issues");
+          redFlagsTitle.innerHTML = `Analysis Status: <span id="issues-count" class="issues-badge">✓</span>`;
+
+          const noIssuesDiv = document.createElement("li");
+          noIssuesDiv.className = "no-issues-message";
+          noIssuesDiv.textContent =
+            "No significant red flags detected in this content. However, always verify information from multiple trusted sources.";
+          flagsList.appendChild(noIssuesDiv);
+        }
 
         document.querySelector(".result-section").classList.add("active");
       }
