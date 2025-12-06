@@ -73,6 +73,7 @@ class FeatureExtractor:
             self.nltk_available = True
             
             # Download required NLTK data with better error handling
+            
             required_data = [
                 ('tokenizers/punkt', 'punkt'),
                 ('taggers/averaged_perceptron_tagger', 'averaged_perceptron_tagger'),
