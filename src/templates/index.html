@@ -1,923 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fake News Detector</title>
-    <style>
-      :root {
-        --primary-color: #3b82f6;
-        --bg-color: #0f172a;
-        --text-color: #e2e8f0;
-        --surface-color: #1e293b;
-        --border-color: #334155;
-        --hover-color: #2563eb;
-      }
 
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, sans-serif;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        line-height: 1.6;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-        width: 100%;
-      }
-
-      header {
-        text-align: center;
-        margin-bottom: 2rem;
-      }
-
-      h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .input-section {
-        background-color: var(--surface-color);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border: 1px solid var(--border-color);
-      }
-
-      .input-tabs {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1rem;
-      }
-
-      .tab-button {
-        padding: 0.5rem 1rem;
-        background: none;
-        border: none;
-        color: var(--text-color);
-        cursor: pointer;
-        border-radius: 6px;
-        transition: background-color 0.2s;
-      }
-
-      .tab-button.active {
-        background-color: var(--primary-color);
-      }
-
-      .tab-button:hover:not(.active) {
-        background-color: var(--hover-color);
-      }
-
-      .input-content > div {
-        display: none;
-      }
-
-      .input-content > div.active {
-        display: block;
-      }
-
-      textarea,
-      input[type="url"] {
-        width: 100%;
-        padding: 1rem;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        margin-bottom: 1rem;
-        font-size: 1rem;
-        resize: vertical;
-        min-height: 150px;
-      }
-
-      input[type="url"] {
-        min-height: auto;
-      }
-
-      input[type="file"] {
-        display: none;
-      }
-
-      .file-upload-label {
-        display: block;
-        padding: 1rem;
-        background-color: var(--bg-color);
-        border: 2px dashed var(--border-color);
-        border-radius: 6px;
-        text-align: center;
-        cursor: pointer;
-        margin-bottom: 1rem;
-        transition: border-color 0.2s;
-      }
-
-      .file-upload-label:hover {
-        border-color: var(--primary-color);
-      }
-
-      button {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: background-color 0.2s;
-      }
-
-      button:hover {
-        background-color: var(--hover-color);
-      }
-
-      .result-section {
-        background-color: var(--surface-color);
-        border-radius: 12px;
-        padding: 1.5rem;
-        border: 1px solid var(--border-color);
-        display: none;
-      }
-
-      .result-section.active {
-        display: block;
-      }
-
-      .prediction-box {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        padding: 1rem;
-        border-radius: 6px;
-        background-color: var(--bg-color);
-      }
-
-      .prediction-label {
-        font-size: 1.2rem;
-        font-weight: 600;
-      }
-
-      .prediction-fake {
-        color: #ef4444;
-      }
-
-      .prediction-real {
-        color: #22c55e;
-      }
-
-      .confidence-bar {
-        height: 4px;
-        background-color: var(--border-color);
-        border-radius: 2px;
-        overflow: hidden;
-        margin: 0.5rem 0;
-      }
-
-      .confidence-fill {
-        height: 100%;
-        background-color: var(--primary-color);
-        transition: width 0.3s ease;
-      }
-
-      .explanation {
-        margin-top: 1rem;
-        padding: 1rem;
-        background-color: var(--bg-color);
-        border-radius: 6px;
-      }
-
-      .red-flags {
-        margin-top: 1.5rem;
-        padding: 1.25rem;
-        background: linear-gradient(
-          135deg,
-          rgba(239, 68, 68, 0.1) 0%,
-          rgba(185, 28, 28, 0.05) 100%
-        );
-        border-radius: 12px;
-        border: 1px solid rgba(239, 68, 68, 0.3);
-      }
-
-      .red-flags h3 {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #fca5a5;
-        font-size: 1.1rem;
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid rgba(239, 68, 68, 0.2);
-      }
-
-      .red-flags h3::before {
-        content: "⚠️";
-        font-size: 1.2rem;
-      }
-
-      .issues-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 1.5rem;
-        height: 1.5rem;
-        padding: 0 0.5rem;
-        background-color: #ef4444;
-        color: white;
-        font-size: 0.8rem;
-        font-weight: 600;
-        border-radius: 9999px;
-        margin-left: 0.5rem;
-      }
-
-      .red-flags.no-issues .issues-badge {
-        background-color: #22c55e;
-      }
-
-      #red-flags-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
-        gap: 0.75rem;
-      }
-
-      .red-flag-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        padding: 0.875rem 1rem;
-        background-color: rgba(15, 23, 42, 0.6);
-        border-radius: 8px;
-        border-left: 3px solid #ef4444;
-        color: #fecaca;
-        font-size: 0.95rem;
-        line-height: 1.5;
-        transition: all 0.2s ease;
-      }
-
-      .red-flag-item:hover {
-        background-color: rgba(239, 68, 68, 0.15);
-        transform: translateX(4px);
-      }
-
-      .red-flag-item::before {
-        content: "🚩";
-        font-size: 1rem;
-        flex-shrink: 0;
-      }
-
-      /* No issues state */
-      .red-flags.no-issues {
-        background: linear-gradient(
-          135deg,
-          rgba(34, 197, 94, 0.1) 0%,
-          rgba(22, 163, 74, 0.05) 100%
-        );
-        border: 1px solid rgba(34, 197, 94, 0.3);
-      }
-
-      .red-flags.no-issues h3 {
-        color: #86efac;
-        border-bottom-color: rgba(34, 197, 94, 0.2);
-      }
-
-      .red-flags.no-issues h3::before {
-        content: "✅";
-      }
-
-      .no-issues-message {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 1rem;
-        background-color: rgba(34, 197, 94, 0.1);
-        border-radius: 8px;
-        color: #bbf7d0;
-        font-size: 0.95rem;
-      }
-
-      .no-issues-message::before {
-        content: "👍";
-        font-size: 1.2rem;
-      }
-
-      /* Severity indicators */
-      .red-flag-item.high-severity {
-        border-left-color: #dc2626;
-        background-color: rgba(220, 38, 38, 0.1);
-      }
-
-      .red-flag-item.medium-severity {
-        border-left-color: #f59e0b;
-      }
-
-      .red-flag-item.medium-severity::before {
-        content: "⚡";
-      }
-
-      .red-flag-item.low-severity {
-        border-left-color: #eab308;
-      }
-
-      .red-flag-item.low-severity::before {
-        content: "💡";
-      }
-
-      .loading {
-        display: none;
-        text-align: center;
-        margin: 2rem 0;
-      }
-
-      .loading.active {
-        display: block;
-      }
-
-      .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid var(--border-color);
-        border-top: 4px solid var(--primary-color);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin: 0 auto;
-      }
-
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      /* Navbar Styles */
-      .navbar {
-        background-color: var(--surface-color);
-        border-bottom: 1px solid var(--border-color);
-        padding: 1rem 0;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-      }
-
-      .nav-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .nav-brand {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .nav-logo {
-        font-size: 1.5rem;
-      }
-
-      .nav-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-      }
-
-      .nav-links {
-        display: flex;
-        gap: 1.5rem;
-      }
-
-      .nav-link {
-        color: var(--text-color);
-        text-decoration: none;
-        padding: 0.5rem;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-      }
-
-      .nav-link:hover {
-        background-color: var(--hover-color);
-      }
-
-      .nav-link.active {
-        color: var(--primary-color);
-      }
-
-      /* Problem & Solution Section */
-      .problem-solution-section {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-bottom: 2rem;
-      }
-
-      .problem-box,
-      .solution-box {
-        background-color: var(--surface-color);
-        border-radius: 12px;
-        padding: 1.5rem;
-        border: 1px solid var(--border-color);
-        transition: transform 0.2s ease;
-      }
-
-      .problem-box:hover,
-      .solution-box:hover {
-        transform: translateY(-5px);
-      }
-
-      .problem-box h2,
-      .solution-box h2 {
-        color: var(--primary-color);
-        margin-bottom: 1rem;
-        font-size: 1.5rem;
-        text-align: center;
-      }
-
-      .icon-wrapper {
-        text-align: center;
-        margin-bottom: 1rem;
-      }
-
-      .problem-icon,
-      .solution-icon {
-        font-size: 2.5rem;
-      }
-
-      .problem-content,
-      .solution-content {
-        color: var(--text-color);
-      }
-
-      .problem-content ul,
-      .solution-content ul {
-        list-style: none;
-        padding: 0;
-        margin: 1rem 0;
-      }
-
-      .problem-content li,
-      .solution-content li {
-        margin: 0.5rem 0;
-        padding-left: 1.5rem;
-        position: relative;
-      }
-
-      .problem-content li:before {
-        content: "⚡";
-        position: absolute;
-        left: 0;
-        color: #ef4444;
-      }
-
-      .solution-content li:before {
-        content: "✓";
-        position: absolute;
-        left: 0;
-        color: #22c55e;
-      }
-
-      .problem-content p,
-      .solution-content p {
-        margin-bottom: 1rem;
-        font-weight: 500;
-      }
-
-      /* Examples Section */
-      .examples-section {
-        background-color: var(--surface-color);
-        border-radius: 12px;
-        padding: 2rem;
-        margin: 2rem 0;
-      }
-
-      .example-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-        margin-top: 1.5rem;
-      }
-
-      .example-card {
-        background-color: var(--bg-color);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 1.5rem;
-      }
-
-      .example-card h3 {
-        margin-bottom: 0.5rem;
-        color: var(--primary-color);
-      }
-
-      .example-source {
-        color: var(--text-color);
-        opacity: 0.7;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-      }
-
-      .tag {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 1rem;
-        font-size: 0.8rem;
-        font-weight: 600;
-      }
-
-      .tag.real {
-        background-color: #22c55e33;
-        color: #22c55e;
-      }
-
-      /* About Section */
-      .about-section {
-        background-color: var(--surface-color);
-        border-radius: 12px;
-        padding: 2rem;
-        margin: 2rem 0;
-      }
-
-      .tech-stack {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-        flex-wrap: wrap;
-      }
-
-      .tech-badge {
-        background-color: var(--primary-color);
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 1rem;
-        font-size: 0.9rem;
-      }
-
-      /* Enhanced Footer */
-      .enhanced-footer {
-        margin-top: auto;
-        background-color: var(--surface-color);
-        border-top: 1px solid var(--border-color);
-        padding: 2rem 0;
-      }
-
-      .footer-content {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 2rem;
-      }
-
-      .footer-section h3 {
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-      }
-
-      .copyright {
-        color: var(--text-color);
-        opacity: 0.7;
-      }
-
-      .disclaimer {
-        color: var(--text-color);
-        opacity: 0.5;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-      <div class="nav-container">
-        <div class="nav-brand">
-          <span class="nav-title">FakeNews Detector</span>
-        </div>
-        <div class="nav-links">
-          <a href="#" class="nav-link">Home</a>
-          <a
-            href="https://github.com/Mounieshh/fake-news-detection-ai"
-            target="_blank"
-            class="nav-link"
-            >GitHub</a
-          >
-        </div>
-      </div>
-    </nav>
-
-    <div class="container">
-      <header>
-        <h1>Fake News Detector</h1>
-        <p>
-          Analyze news content using advanced AI for authenticity verification
-        </p>
-      </header>
-
-      <div class="input-section">
-        <div class="input-tabs">
-          <button class="tab-button active" data-tab="text">Text</button>
-          <button class="tab-button" data-tab="url">URL</button>
-          <button class="tab-button" data-tab="image">Image</button>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fake News Detector</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="nav-logo">FND</div>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About This Project</a></li>
+      <li><a href="https://github.com/Mounieshh/fake-news-detection-ai">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <div class="bg-glow"></div>
+
+
+  <div class="container">
+    <!-- Left Side: Hero Text -->
+    <header class="hero-section">
+      <h1 class="hero-title">
+        FakeNews<br>
+        <span class="hero-accent">Detector</span>
+      </h1>
+      <p class="hero-subtitle">
+        Verify news authenticity instantly. Paste text or a URL to analyze credibility using our advanced AI models.
+      </p>
+    </header>
+
+    <!-- Right Side: Interaction Card -->
+    <main class="card-section">
+      <div class="card">
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('text')">Text</button>
+          <button class="tab-btn" onclick="switchTab('url')">URL</button>
         </div>
 
-        <form id="analyzer-form" enctype="multipart/form-data">
-          <div class="input-content">
-            <div class="tab-content active" id="text-input">
-              <textarea
-                name="text"
-                placeholder="Paste news article text here..."
-              ></textarea>
-            </div>
-            <div class="tab-content" id="url-input">
-              <input
-                type="url"
-                name="url"
-                placeholder="Enter news article URL..."
-              />
-            </div>
-            <div class="tab-content" id="image-input">
-              <label class="file-upload-label" for="image-upload">
-                <span>Click to upload or drag and drop an image</span>
-                <input
-                  type="file"
-                  id="image-upload"
-                  name="image"
-                  accept="image/*"
-                />
-              </label>
-              <div id="image-preview"></div>
+        <!-- Inputs -->
+        <div id="input-container">
+          <!-- Text Input -->
+          <div id="text-tab" class="tab-content active">
+            <div class="input-group">
+              <textarea id="text-input" placeholder="Start typing or paste news content..."></textarea>
             </div>
           </div>
-          <button type="submit">Analyze</button>
-        </form>
-      </div>
 
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>Analyzing content...</p>
-      </div>
-
-      <div class="result-section">
-        <div class="prediction-box">
-          <div>
-            <div class="prediction-label">
-              Prediction: <span id="prediction"></span>
+          <!-- URL Input -->
+          <div id="url-tab" class="tab-content">
+            <div class="input-group">
+              <input type="url" id="url-input" placeholder="https://example.com/article">
             </div>
-            <div class="confidence-bar">
-              <div class="confidence-fill" id="confidence-fill"></div>
-            </div>
-            <div>Confidence: <span id="confidence"></span>%</div>
           </div>
         </div>
 
-        <div class="explanation">
-          <h3>Analysis Explanation:</h3>
-          <p id="explanation"></p>
-        </div>
+        <!-- Analysis Button -->
+        <button id="analyze-btn" class="analyze-btn" onclick="analyzeContent()">
+          Analyze Content
+        </button>
 
-        <div class="red-flags">
-          <h3>
-            Potential Issues:
-            <span id="issues-count" class="issues-badge"></span>
-          </h3>
-          <ul id="red-flags-list"></ul>
+        <!-- Results Display -->
+        <div id="result-area" class="result-box" style="display: none;">
+          <div class="result-header">
+            <span id="prediction-text" class="prediction-value">REAL</span>
+          </div>
+
+          <div class="confidence-bg">
+            <div id="confidence-bar" class="confidence-fill" style="width: 0%"></div>
+          </div>
+
+          <p id="explanation" class="explanation-text">
+            Analysis complete.
+          </p>
+
+          <div class="meta-info">
+            Predicted Results
+          </div>
         </div>
       </div>
+    </main>
+  </div>
 
-      <!-- Problem & Solution Section
-      <section class="problem-solution-section">
-        <div class="problem-box">
-          <h2>The Problem</h2>
-          <div class="problem-content">
-            <div class="icon-wrapper">
-              <span class="problem-icon">⚠️</span>
-            </div>
-            <p>
-              The spread of fake news on social media has become a critical
-              issue in our digital age:
-            </p>
-            <ul>
-              <li>Rapid spread of misinformation across platforms</li>
-              <li>Social unrest due to false narratives</li>
-              <li>Difficulty in distinguishing fact from fiction</li>
-              <li>Impact on public opinion and decision-making</li>
-              <li>Threat to democratic processes</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="solution-box">
-          <h2>Our Solution</h2>
-          <div class="solution-content">
-            <div class="icon-wrapper">
-              <span class="solution-icon">💡</span>
-            </div>
-            <p>We've developed an AI-powered tool that:</p>
-            <ul>
-              <li>Analyzes content using advanced machine learning</li>
-              <li>Processes text, images, and URLs comprehensively</li>
-              <li>Provides real-time fact-checking and verification</li>
-              <li>Flags potential misinformation with explanations</li>
-              <li>Helps users make informed decisions about content</li>
-            </ul>
-          </div>
-        </div>
-      </section> -->
+  <footer class="footer">
+    <div class="theme-toggle-container">
+      <button id="theme-toggle" class="theme-switch" aria-label="Toggle Theme">
+        <span id="theme-icon">🌙</span> Dark Mode
+      </button>
     </div>
+  </footer>
 
-    <footer>
-      <p></p>
-    </footer>
+  <script src="/static/js/script.js"></script>
+</body>
 
-    <script>
-      // Tab switching
-      document.querySelectorAll(".tab-button").forEach((button) => {
-        button.addEventListener("click", () => {
-          document
-            .querySelectorAll(".tab-button")
-            .forEach((b) => b.classList.remove("active"));
-          document
-            .querySelectorAll(".tab-content")
-            .forEach((c) => c.classList.remove("active"));
-          button.classList.add("active");
-          document
-            .getElementById(`${button.dataset.tab}-input`)
-            .classList.add("active");
-        });
-      });
-
-      // Form submission
-      document
-        .getElementById("analyzer-form")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const form = e.target;
-          const activeTab =
-            document.querySelector(".tab-button.active").dataset.tab;
-          const formData = new FormData(form);
-
-          // Clear any existing form data for inactive tabs
-          if (activeTab !== "text") formData.delete("text");
-          if (activeTab !== "url") formData.delete("url");
-          if (activeTab !== "image") formData.delete("image");
-
-          document.querySelector(".loading").classList.add("active");
-          document.querySelector(".result-section").classList.remove("active");
-
-          try {
-            const response = await fetch("/analyze", {
-              method: "POST",
-              body: formData,
-            });
-
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            if (result.error) {
-              throw new Error(result.error);
-            }
-
-            displayResults(result);
-          } catch (error) {
-            console.error("Error:", error);
-            alert(
-              error.message ||
-                "An error occurred during analysis. Please try again."
-            );
-          } finally {
-            document.querySelector(".loading").classList.remove("active");
-          }
-        });
-
-      // Display results
-      function displayResults(result) {
-        document.getElementById("prediction").textContent = result.prediction;
-        document.getElementById("prediction").className =
-          result.prediction === "FAKE" ? "prediction-fake" : "prediction-real";
-
-        const confidence = Math.round(result.probability * 100);
-        document.getElementById("confidence").textContent = confidence;
-        document.getElementById(
-          "confidence-fill"
-        ).style.width = `${confidence}%`;
-
-        document.getElementById("explanation").textContent = result.explanation;
-
-        // Handle red flags / potential issues
-        const flagsList = document.getElementById("red-flags-list");
-        const redFlagsContainer = document.querySelector(".red-flags");
-        const redFlagsTitle = redFlagsContainer.querySelector("h3");
-        flagsList.innerHTML = "";
-
-        // High severity keywords
-        const highSeverityKeywords = [
-          "manipulation",
-          "fabricated",
-          "false",
-          "misleading",
-          "propaganda",
-          "doctored",
-          "deceptive",
-        ];
-        // Medium severity keywords
-        const mediumSeverityKeywords = [
-          "unverified",
-          "bias",
-          "sensational",
-          "exaggerated",
-          "inconsistent",
-          "clickbait",
-        ];
-
-        // Check if there are meaningful red flags
-        const hasIssues =
-          result.red_flags &&
-          result.red_flags.length > 0 &&
-          !result.red_flags.includes("No specific red flags identified");
-
-        if (hasIssues) {
-          redFlagsContainer.classList.remove("no-issues");
-          redFlagsTitle.innerHTML = `Potential Issues Detected: <span id="issues-count" class="issues-badge">${result.red_flags.length}</span>`;
-
-          result.red_flags.forEach((flag) => {
-            const li = document.createElement("li");
-            li.textContent = flag;
-            li.className = "red-flag-item";
-
-            // Determine severity based on content
-            const flagLower = flag.toLowerCase();
-            if (
-              highSeverityKeywords.some((keyword) =>
-                flagLower.includes(keyword)
-              )
-            ) {
-              li.classList.add("high-severity");
-            } else if (
-              mediumSeverityKeywords.some((keyword) =>
-                flagLower.includes(keyword)
-              )
-            ) {
-              li.classList.add("medium-severity");
-            } else {
-              li.classList.add("low-severity");
-            }
-
-            flagsList.appendChild(li);
-          });
-        } else {
-          // No issues found
-          redFlagsContainer.classList.add("no-issues");
-          redFlagsTitle.innerHTML = `Analysis Status: <span id="issues-count" class="issues-badge">✓</span>`;
-
-          const noIssuesDiv = document.createElement("li");
-          noIssuesDiv.className = "no-issues-message";
-          noIssuesDiv.textContent =
-            "No significant red flags detected in this content. However, always verify information from multiple trusted sources.";
-          flagsList.appendChild(noIssuesDiv);
-        }
-
-        document.querySelector(".result-section").classList.add("active");
-      }
-
-      // Image preview
-      document
-        .getElementById("image-upload")
-        .addEventListener("change", (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              const preview = document.getElementById("image-preview");
-              preview.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 300px; margin-top: 1rem;">`;
-            };
-            reader.readAsDataURL(file);
-          }
-        });
-    </script>
-  </body>
 </html>
