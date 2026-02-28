@@ -8,6 +8,8 @@
     /* Lime green like Chain360 */
     --accent-hover: #b4ff4c;
     --danger-color: #ff3b30;
+    --success-color: #22c55e;
+    /* Green for REAL predictions */
     --border-color: #222222;
     --font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
@@ -24,35 +26,41 @@ body {
     font-family: var(--font-family);
     min-height: 100vh;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     overflow-x: hidden;
     transition: background-color 0.3s ease, color 0.3s ease;
+    padding-top: 100px;
+    padding-bottom: 80px;
 }
 
 /* Layout */
 .container {
     width: 100%;
-    max-width: 1200px;
-    padding: 2rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
+    max-width: 900px;
+    padding: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
     align-items: center;
+    justify-content: center;
 }
 
-/* Left Section (Hero) */
+/* Hero Section */
 .hero-section {
     position: relative;
+    text-align: center;
+    width: 100%;
 }
 
 .hero-title {
-    font-size: 5rem;
+    font-size: 4rem;
     /* Huge */
     line-height: 1;
     font-weight: 700;
     letter-spacing: -2px;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .hero-title span {
@@ -65,9 +73,10 @@ body {
 
 .hero-subtitle {
     color: var(--text-secondary);
-    font-size: 1.25rem;
-    max-width: 400px;
-    line-height: 1.6;
+    font-size: 1.1rem;
+    max-width: 600px;
+    line-height: 1.5;
+    margin: 0 auto;
 }
 
 /* Background Effect (Green glow) */
@@ -83,10 +92,11 @@ body {
     z-index: -1;
 }
 
-/* Right Section (Card) */
+/* Card Section */
 .card-section {
     display: flex;
     justify-content: center;
+    width: 100%;
 }
 
 .card {
@@ -95,9 +105,13 @@ body {
     border-radius: 24px;
     padding: 2rem;
     width: 100%;
-    max-width: 480px;
+    max-width: 700px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="light"] .card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* Tabs */
@@ -105,10 +119,11 @@ body {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 2rem;
-    background-color: #000;
+    background-color: var(--bg-color);
     padding: 0.25rem;
     border-radius: 12px;
     width: fit-content;
+    border: 1px solid var(--border-color);
 }
 
 .tab-btn {
@@ -137,13 +152,15 @@ body {
 
 /* Light Theme Variables */
 [data-theme="light"] {
-    --bg-color: #f8fafc;
+    --bg-color: #f9f7f4;
     --card-bg: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --accent-color: #2563eb;
-    --accent-hover: #1d4ed8;
-    --border-color: #e2e8f0;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --accent-color: #a4f63c;
+    --accent-hover: #8fd633;
+    --danger-color: #dc2626;
+    --success-color: #16a34a;
+    --border-color: #e5e1dc;
 }
 
 /* Navbar */
@@ -221,8 +238,8 @@ body {
     background-color: var(--bg-color);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -241,7 +258,7 @@ textarea {
     font-size: 1.5rem;
     /* Big input text like crypto amount */
     resize: none;
-    min-height: 120px;
+    min-height: 180px;
 }
 
 input {
@@ -298,25 +315,36 @@ textarea::placeholder {
     font-weight: 700;
 }
 
+.confidence-score {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-left: 1rem;
+}
+
 .prediction-fake {
     color: var(--danger-color);
 }
 
 .prediction-real {
-    color: var(--accent-color);
+    color: var(--success-color);
 }
 
 .confidence-bg {
-    background-color: #222;
+    background-color: rgba(0, 0, 0, 0.1);
     height: 6px;
     border-radius: 3px;
     overflow: hidden;
     margin-bottom: 1rem;
 }
 
+[data-theme="dark"] .confidence-bg {
+    background-color: #222;
+}
+
 .confidence-fill {
     height: 100%;
-    background-color: var(--accent-color);
+    background-color: var(--success-color);
     width: 0%;
     transition: width 1s ease;
 }
@@ -329,29 +357,29 @@ textarea::placeholder {
 
 .meta-info {
     font-size: 0.8rem;
-    color: #444;
+    color: var(--text-secondary);
     margin-top: 1rem;
     text-align: right;
+    opacity: 0.7;
 }
 
 /* Responsive */
 @media (max-width: 900px) {
     .container {
-        grid-template-columns: 1fr;
         padding: 1rem;
+        gap: 2rem;
     }
 
     .hero-title {
         font-size: 3rem;
-        text-align: center;
     }
 
     .hero-subtitle {
-        margin: 0 auto 3rem;
-        text-align: center;
+        font-size: 1rem;
     }
 
     .card {
         padding: 1.5rem;
+        max-width: 100%;
     }
 }

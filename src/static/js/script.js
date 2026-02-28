@@ -86,6 +86,7 @@ async function analyzeContent() {
 function displayResult(data) {
     const resultArea = document.getElementById('result-area');
     const predText = document.getElementById('prediction-text');
+    const confScore = document.getElementById('confidence-score');
     const confBar = document.getElementById('confidence-bar');
     const explanation = document.getElementById('explanation');
 
@@ -97,6 +98,9 @@ function displayResult(data) {
     } else {
         predText.classList.add('prediction-fake');
     }
+
+    // Set Confidence Score
+    confScore.innerText = (data.confidence || 0) + '%';
 
     // Set Confidence Bar
     // Animated fill
