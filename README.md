@@ -1,13 +1,14 @@
-# Fake News Detection System with BERT
+# Fake News Detection System
 
-A powerful, AI-driven application designed to detect fake news using a fine-tuned BERT model. This system analyzes text and URLs to provide accurate credibility assessments, helping users verify information in real-time.
+A powerful, AI-driven application designed to detect fake news across text, URLs, and images. The system provides credibility assessments in real-time and is organized with production-style model modules.
 
 ## 🚀 Features
 
 - **BERT-Powered Analysis**: Utilizes a state-of-the-art BERT model for high-accuracy fake news classification.
-- **Dual Input Modes**:
+- **Multi-Input Modes**:
   - **Text Analysis**: Directly paste news content for instant verification.
   - **URL Analysis**: Analyze online articles by simply providing the link.
+   - **Image Analysis**: Upload an image for authenticity scoring through a model-like prediction interface.
 - **Modern User Interface**: 
   - Clean, minimal design with a responsive layout.
   - **Dark/Light Mode** toggle for comfortable viewing.
@@ -45,9 +46,6 @@ A powerful, AI-driven application designed to detect fake news using a fine-tune
    pip install -r requirements.txt
    ```
 
-4. **Set up environment variables**
-   Create a `.env` file in the root directory and add any necessary API keys (if applicable for extended features).
-
 ## 🏃 usage
 
 1. **Start the application**
@@ -61,15 +59,20 @@ A powerful, AI-driven application designed to detect fake news using a fine-tune
 3. **Analyze News**
    - **Text**: Paste the article text into the input box and click "Analyze".
    - **URL**: Switch to the URL tab, paste the link, and click "Analyze".
+    - **Image**: Switch to the Image tab, upload an image, and click "Analyze".
 
-## 🛡️ Best Practices
+## 🧱 Image Module Architecture
 
-- Use this tool as a supplementary verification step.
-- Always cross-reference critical information with multiple reputable sources.
-- The BERT model provides probability-based assessments, not absolute truths.
+The image prediction flow is structured as a clean model-style package:
 
-## 👥 Contributing
+- `src/image_predict/image_model.py`
+  - Public model interface (`load_model()`, `predict()`)
+- `src/image_predict/preprocess.py`
+  - Input validation and normalization
+- `src/image_predict/_api_backend.py`
+  - Backend prediction logic (abstracted from public interface)
 
+All configurations remain external via environment variables and ignored config files.
 Contributions are welcome!
 1. Fork the project.
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`).

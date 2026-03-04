@@ -30,7 +30,7 @@
         <span class="hero-accent">Detector</span>
       </h1>
       <p class="hero-subtitle">
-        Verify news authenticity instantly. Paste text or a URL to analyze credibility using our advanced AI models.
+        Verify news authenticity instantly. Analyze text, URLs, or images using our advanced AI models.
       </p>
     </header>
 
@@ -41,6 +41,7 @@
         <div class="tabs">
           <button class="tab-btn active" onclick="switchTab('text')">Text</button>
           <button class="tab-btn" onclick="switchTab('url')">URL</button>
+          <button class="tab-btn" onclick="switchTab('image')">Image</button>
         </div>
 
         <!-- Inputs -->
@@ -56,6 +57,15 @@
           <div id="url-tab" class="tab-content">
             <div class="input-group">
               <input type="url" id="url-input" placeholder="https://example.com/article">
+            </div>
+          </div>
+
+          <div id="image-tab" class="tab-content">
+            <div class="input-group">
+              <input type="file" id="image-input" accept="image/*">
+            </div>
+            <div class="input-group">
+              <textarea id="image-text-input" placeholder="Optional context text for image analysis..."></textarea>
             </div>
           </div>
         </div>

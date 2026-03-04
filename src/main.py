@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, jsonify
 from gemini_predictor import GeminiPredictor
 from input_handlers.url_handler import URLHandler
+from image_predict.image_model import load_model as load_image_model, predict as predict_image
 import os
 
 app = Flask(__name__)
 predictor = GeminiPredictor()
 url_handler = URLHandler()
+image_model = load_image_model()
 
 @app.route('/')
 def home():
@@ -37,6 +39,30 @@ def analyze():
         
     # Predict
     result = predictor.predict(content_to_analyze)
+    return jsonify(result)
+
+
+@app.route('/analyze-image', methods=['POST'])
+def analyze_image():
+    image_file = request.files.get('image')
+    context_text = request.form.get('text', '')
+
+    if not image_file or not image_file.filename:
+        return jsonify({"prediction": "ERROR", "explanation": "Please upload an image file."}), 400
+
+    image_bytes = image_file.read()
+    mime_type = image_file.mimetype or 'image/jpeg'
+
+    result = predict_image(
+        model=image_model,
+        image_bytes=image_bytes,
+        mime_type=mime_type,
+        context=context_text
+    )
+
+    if result.get('prediction') == 'ERROR':
+        return jsonify(result), 400
+
     return jsonify(result)
 
 if __name__ == '__main__':

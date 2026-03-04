@@ -34,6 +34,14 @@ async function analyzeContent() {
 
     // Get Input Data
     let payload = {};
+    let endpoint = '/analyze';
+    let fetchOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+
     if (window.currentTab === 'text') {
         const textVal = document.getElementById('text-input').value.trim();
         if (!textVal) {
@@ -41,13 +49,33 @@ async function analyzeContent() {
             return;
         }
         payload = { text: textVal };
-    } else {
+    } else if (window.currentTab === 'url') {
         const urlVal = document.getElementById('url-input').value.trim();
         if (!urlVal) {
             alert("Please enter a valid URL.");
             return;
         }
         payload = { url: urlVal };
+    } else if (window.currentTab === 'image') {
+        const imageInput = document.getElementById('image-input');
+        const contextText = document.getElementById('image-text-input').value.trim();
+
+        if (!imageInput || !imageInput.files || imageInput.files.length === 0) {
+            alert("Please upload an image to analyze.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', imageInput.files[0]);
+        if (contextText) {
+            formData.append('text', contextText);
+        }
+
+        endpoint = '/analyze-image';
+        fetchOptions = {
+            method: 'POST',
+            body: formData
+        };
     }
 
     // Set Loading State
@@ -57,13 +85,11 @@ async function analyzeContent() {
     resultArea.style.display = 'none';
 
     try {
-        const response = await fetch('/analyze', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+        if (window.currentTab !== 'image') {
+            fetchOptions.body = JSON.stringify(payload);
+        }
+
+        const response = await fetch(endpoint, fetchOptions);
 
         const data = await response.json();
 

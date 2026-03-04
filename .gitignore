@@ -1,3 +1,8 @@
+dataset/
+model/
+multimodal_only_samples
+image_cache
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -103,6 +108,8 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
+!.env.example
 .venv
 env/
 venv/
@@ -180,6 +187,7 @@ logs/
 config.ini
 secrets.json
 .secrets
+config/private/
 
 # Model files (if any)
 *.pkl
