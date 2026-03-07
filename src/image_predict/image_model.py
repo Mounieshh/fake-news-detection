@@ -7,10 +7,26 @@ from .preprocess import normalize_input
 class ImageFakeNewsModel:
     def __init__(self, model_path: str = "model/image_model.pt"):
         self.model_path = model_path
-        self.backend = ExternalImageApiBackend()
-        self.is_loaded = True
+        self.backend = None
+        self.is_loaded = False
+        self.error_message = None
+        
+        try:
+            self.backend = ExternalImageApiBackend()
+            self.is_loaded = True
+        except ValueError as e:
+            self.error_message = str(e)
+            self.is_loaded = False
 
     def predict(self, image_bytes: bytes, mime_type: str, context: str = "") -> Dict[str, Any]:
+        if not self.is_loaded:
+            return {
+                "prediction": "ERROR",
+                "confidence": 0,
+                "explanation": self.error_message or "Image model backend is not initialized. Check .env file for NVIDIA_API_KEY.",
+                "meta": "Configuration Error"
+            }
+        
         try:
             image_bytes, mime_type = normalize_input(image_bytes=image_bytes, mime_type=mime_type)
         except ValueError as exc:
@@ -34,11 +50,12 @@ def predict(
     mime_type: str,
     context: str = ""
 ) -> Dict[str, Any]:
-    if not model:
+    if not model or not model.is_loaded:
+        error_msg = model.error_message if model else "Image model is not initialized"
         return {
             "prediction": "ERROR",
             "confidence": 0,
-            "explanation": "Image model is not loaded.",
+            "explanation": error_msg or "Image model is not loaded. Check .env file for NVIDIA_API_KEY.",
             "meta": "System Error"
         }
 

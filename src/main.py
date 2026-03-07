@@ -1,8 +1,12 @@
 from flask import Flask, render_template, request, jsonify
-from gemini_predictor import GeminiPredictor
+from dotenv import load_dotenv
+from src.prediction import GeminiPredictor
 from input_handlers.url_handler import URLHandler
 from image_predict.image_model import load_model as load_image_model, predict as predict_image
 import os
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 predictor = GeminiPredictor()

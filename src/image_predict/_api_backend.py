@@ -1,51 +1,84 @@
-import base64
-import os
-from typing import Any, Dict, List
+"""
+Gemini-based Image Analysis Backend
+Simple, fast, and reliable image fake news detection using Google's Gemini Vision API
+"""
 
-import requests
+import os
+from typing import Any, Dict
+from io import BytesIO
+
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
 
 class ExternalImageApiBackend:
-    # ext: {mime_type, media_type}
-    SUPPORTED_FORMATS = {
-        "png": ["image/png", "image_url"],
-        "jpg": ["image/jpeg", "image_url"],
-        "jpeg": ["image/jpeg", "image_url"],
-        "webp": ["image/webp", "image_url"],
-        "mp4": ["video/mp4", "video_url"],
-        "webm": ["video/webm", "video_url"],
-        "mov": ["video/mov", "video_url"]
-    }
-
+    """Gemini Vision API backend for image analysis"""
+    
     def __init__(self):
-        self.api_key = os.getenv("NVIDIA_API_KEY")
-        self.invoke_url = "https://integrate.api.nvidia.com/v1/chat/completions"
-        self.model = "nvidia/nemotron-nano-12b-v2-vl"
-        self.query = "Describe the scene and identify any potential signs of fake or manipulated content"
-
-    def infer(self, image_bytes: bytes, mime_type: str, context: str = "") -> Dict[str, Any]:
+        self.api_key = os.getenv("GEMINI_API_KEY")
         if not self.api_key:
-            return {
-                "prediction": "ERROR",
-                "confidence": 0,
-                "explanation": "Image analysis model is not configured.",
-                "meta": "System Error"
-            }
-
+            raise ValueError("GEMINI_API_KEY not set in environment variables. Please set it in .env file.")
+        
+        self.client = genai.Client(api_key=self.api_key)
+        self.model = "gemini-2.5-flash"  # Gemini 2.5 Flash with vision support
+    
+    def infer(self, image_bytes: bytes, mime_type: str, context: str = "") -> Dict[str, Any]:
+        """Analyze image for fake news/manipulation using Gemini Vision API"""
+        
         try:
-            # Create temporary file from bytes
-            import tempfile
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
-                tmp.write(image_bytes)
-                tmp_path = tmp.name
+            print(f"Analyzing image with Gemini (size: {len(image_bytes) / 1024:.1f} KB)...", flush=True)
+            
+            # Prepare the analysis prompt
+            prompt = """Analyze this image for signs of fake news, manipulation, or deepfakes.
 
-            response_data = self._chat_with_media([tmp_path], self.query)
-            os.unlink(tmp_path)
+Look for:
+- AI-generated content or deepfakes
+- Photo manipulation or editing artifacts  
+- Misleading context or staging
+- Inconsistencies in lighting, shadows, reflections
+- Unnatural facial features or body proportions
+- Signs of splicing or compositing
 
-            return self._parse_response(response_data)
+Respond ONLY with valid JSON in this exact format:
+{
+    "prediction": "REAL" or "FAKE",
+    "confidence": <number between 0-100>,
+    "explanation": "<brief explanation of your analysis>"
+}"""
+            
+            # Upload the image
+            upload_file = self.client.files.upload(
+                file=BytesIO(image_bytes),
+                config=types.UploadFileConfig(
+                    mime_type=mime_type,
+                    display_name="image_analysis"
+                )
+            )
+            
+            print("Image uploaded, waiting for analysis...", flush=True)
+            
+            # Generate analysis with the image
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=[
+                    types.Part.from_uri(
+                        file_uri=upload_file.uri,
+                        mime_type=mime_type
+                    ),
+                    prompt
+                ],
+                config=types.GenerateContentConfig(
+                    response_mime_type='application/json',
+                    temperature=0.3
+                )
+            )
+            
+            print("Analysis complete!", flush=True)
+            return self._parse_response(response)
 
         except Exception as exc:
             print(f"Image analysis error: {str(exc)}", flush=True)
@@ -57,131 +90,99 @@ class ExternalImageApiBackend:
                 "explanation": f"Image analysis failed: {str(exc)}",
                 "meta": "System Error"
             }
-
-    def _get_extension(self, filename: str) -> str:
-        """Extract file extension"""
-        _, ext = os.path.splitext(filename)
-        return ext[1:].lower()
-
-    def _encode_media_base64(self, media_file: str) -> str:
-        """Encode media file to base64 string"""
-        with open(media_file, "rb") as f:
-            return base64.b64encode(f.read()).decode("utf-8")
-
-    def _chat_with_media(self, media_files: List[str], query: str) -> Dict[str, Any]:
-        """Call NVIDIA API with media files"""
-        assert isinstance(media_files, list), f"media_files must be a list"
-
-        has_video = False
-
-        # Build content based on whether we have media files
-        if len(media_files) == 0:
-            content = query
-        else:
-            content = [{"type": "text", "text": query}]
-
-            for media_file in media_files:
-                ext = self._get_extension(media_file)
-                assert ext in self.SUPPORTED_FORMATS, f"{media_file} format is not supported"
-
-                media_type_key = self.SUPPORTED_FORMATS[ext][1]
-                mime = self.SUPPORTED_FORMATS[ext][0]
-
-                if media_type_key == "video_url":
-                    has_video = True
-
-                print(f"Encoding {media_file} as base64...", flush=True)
-                base64_data = self._encode_media_base64(media_file)
-
-                # Add media to content array
-                media_obj = {
-                    "type": media_type_key,
-                    media_type_key: {
-                        "url": f"data:{mime};base64,{base64_data}"
-                    }
-                }
-                content.append(media_obj)
-
-            if has_video:
-                assert len(media_files) == 1, "Only single video supported."
-
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-
-        system_prompt = "/think"
-
-        messages = [
-            {
-                "role": "system",
-                "content": system_prompt,
-            },
-            {
-                "role": "user",
-                "content": content,
-            }
-        ]
-
-        payload = {
-            "max_tokens": 4096,
-            "temperature": 1,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 0,
-            "messages": messages,
-            "stream": False,
-            "model": self.model,
-        }
-
-        response = requests.post(self.invoke_url, headers=headers, json=payload, timeout=60)
-        response.raise_for_status()
-        return response.json()
-
-    def _parse_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse API response and extract prediction"""
+    
+    def _parse_response(self, response) -> Dict[str, Any]:
+        """Parse Gemini API response and extract prediction"""
         try:
-            choices = response.get("choices", [])
-            if not choices:
+            import json
+            
+            # Clean and parse JSON response
+            raw_text = response.text.replace('```json', '').replace('```', '').strip()
+            result = json.loads(raw_text)
+            
+            # Validate and normalize prediction
+            prediction = result.get("prediction", "UNCERTAIN").upper()
+            if prediction not in ["REAL", "FAKE"]:
+                prediction = "UNCERTAIN"
+            
+            # Validate and clamp confidence
+            confidence = int(result.get("confidence", 50))
+            confidence = max(0, min(100, confidence))
+            
+            explanation = result.get("explanation", "Analysis completed")
+            
+            return {
+                "prediction": prediction,
+                "confidence": confidence,
+                "explanation": explanation[:500],
+                "meta": "Gemini Vision Analysis"
+            }
+            
+        except Exception as exc:
+            # Fallback: analyze raw text response
+            print(f"JSON parsing failed, using text analysis: {str(exc)}", flush=True)
+            try:
+                text = response.text.lower()
+                
+                # Check for fake indicators
+                fake_keywords = ["fake", "manipulated", "ai-generated", "deepfake", "edited", "synthetic"]
+                real_keywords = ["real", "authentic", "genuine", "original", "unaltered"]
+                
+                fake_score = sum(1 for keyword in fake_keywords if keyword in text)
+                real_score = sum(1 for keyword in real_keywords if keyword in text)
+                
+                if fake_score > real_score:
+                    prediction = "FAKE"
+                    confidence = min(75, 40 + fake_score * 15)
+                elif real_score > 0:
+                    prediction = "REAL"
+                    confidence = min(75, 40 + real_score * 15)
+                else:
+                    prediction = "UNCERTAIN"
+                    confidence = 50
+                
+                return {
+                    "prediction": prediction,
+                    "confidence": confidence,
+                    "explanation": response.text[:500],
+                    "meta": "Gemini Vision Analysis"
+                }
+            except:
                 return {
                     "prediction": "ERROR",
                     "confidence": 0,
-                    "explanation": "No response from model.",
+                    "explanation": "Failed to parse API response",
                     "meta": "System Error"
                 }
-
-            message_content = choices[0].get("message", {}).get("content", "")
-
-            # Simple heuristic: check if content mentions fake/manipulated indicators
-            lower_content = message_content.lower()
-            fake_indicators = ["fake", "manipulated", "synthetic", "ai-generated", "deepfake", "edited", "altered"]
-            real_indicators = ["authentic", "genuine", "original", "natural", "unedited"]
-
-            fake_score = sum(1 for indicator in fake_indicators if indicator in lower_content)
-            real_score = sum(1 for indicator in real_indicators if indicator in lower_content)
-
-            if fake_score > real_score:
-                prediction = "FAKE"
-                confidence = min(100, (fake_score * 25))
-            elif real_score > 0:
-                prediction = "REAL"
-                confidence = min(100, (real_score * 25))
-            else:
-                prediction = "UNCERTAIN"
-                confidence = 50
-
+    
+    def test_connection(self) -> Dict[str, Any]:
+        """Test Gemini API connection"""
+        if not self.api_key:
             return {
-                "prediction": prediction,
-                "confidence": int(confidence),
-                "explanation": message_content[:500],
-                "meta": "Multimodal Vision Model Analysis"
+                "status": "ERROR",
+                "message": "GEMINI_API_KEY not configured"
             }
-
-        except Exception as exc:
+        
+        try:
+            print("Testing Gemini API connection...", flush=True)
+            # Quick test - generate simple content
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents="test"
+            )
+            
+            if response.text:
+                return {
+                    "status": "SUCCESS",
+                    "message": "Gemini API connection successful"
+                }
+            else:
+                return {
+                    "status": "ERROR",
+                    "message": "API returned empty response"
+                }
+        except Exception as e:
             return {
-                "prediction": "ERROR",
-                "confidence": 0,
-                "explanation": f"Failed to parse API response: {str(exc)}",
-                "meta": "System Error"
+                "status": "ERROR",
+                "message": f"Gemini API connection failed: {str(e)}"
             }
