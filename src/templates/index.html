@@ -15,38 +15,37 @@
     <ul class="nav-links">
       <li><a href="/">Home</a></li>
       <li><a href="/about">About This Project</a></li>
-      <li><a href="https://github.com/Mounieshh/fake-news-detection-ai">GitHub</a></li>
+      <li><a href="https://github.com/Mounieshh/fake-news-detection" target="_blank">GitHub</a></li>
     </ul>
   </nav>
 
   <div class="bg-glow"></div>
 
-
   <div class="container">
-    <!-- Left Side: Hero Text -->
+    <!-- Hero Section -->
     <header class="hero-section">
       <h1 class="hero-title">
         FakeNews<br>
         <span class="hero-accent">Detector</span>
       </h1>
       <p class="hero-subtitle">
-        Verify news authenticity instantly. Analyze text, URLs, or images using our advanced AI models.
+        Verify news authenticity instantly. Paste text or a URL to analyze credibility using models.
       </p>
     </header>
 
-    <!-- Right Side: Interaction Card -->
+    <!-- Interaction Card -->
     <main class="card-section">
       <div class="card">
-        <!-- Navigation Tabs -->
+        <!-- Segmented Control Tabs -->
         <div class="tabs">
           <button class="tab-btn active" onclick="switchTab('text')">Text</button>
           <button class="tab-btn" onclick="switchTab('url')">URL</button>
           <button class="tab-btn" onclick="switchTab('image')">Image</button>
         </div>
 
-        <!-- Inputs -->
+        <!-- Input Container -->
         <div id="input-container">
-          <!-- Text Input -->
+          <!-- Text Input (Active by default) -->
           <div id="text-tab" class="tab-content active">
             <div class="input-group">
               <textarea id="text-input" placeholder="Start typing or paste news content..."></textarea>
@@ -54,28 +53,29 @@
           </div>
 
           <!-- URL Input -->
-          <div id="url-tab" class="tab-content">
+          <div id="url-tab" class="tab-content" style="display: none;">
             <div class="input-group">
               <input type="url" id="url-input" placeholder="https://example.com/article">
             </div>
           </div>
 
-          <div id="image-tab" class="tab-content">
+          <!-- Image Input -->
+          <div id="image-tab" class="tab-content" style="display: none;">
             <div class="input-group">
               <input type="file" id="image-input" accept="image/*">
             </div>
             <div class="input-group">
-              <textarea id="image-text-input" placeholder="Optional context text for image analysis..."></textarea>
+              <textarea id="image-text-input" placeholder="Optional context text for image analysis..." style="min-height: 80px;"></textarea>
             </div>
           </div>
         </div>
 
-        <!-- Analysis Button -->
+        <!-- Action Button -->
         <button id="analyze-btn" class="analyze-btn" onclick="analyzeContent()">
           Analyze Content
         </button>
 
-        <!-- Results Display -->
+        <!-- Dynamic Result Area -->
         <div id="result-area" class="result-box" style="display: none;">
           <div class="result-header">
             <span id="prediction-text" class="prediction-value">REAL</span>
@@ -86,24 +86,20 @@
           </div>
 
           <p id="explanation" class="explanation-text">
-            Analysis complete.
+            Our AI has analyzed the content and provided a prediction.
           </p>
 
-          <div class="meta-info">
-            Predicted Results
-          </div>
+          
         </div>
       </div>
     </main>
-  </div>
 
-  <footer class="footer">
-    <div class="theme-toggle-container">
+    <footer class="footer">
       <button id="theme-toggle" class="theme-switch" aria-label="Toggle Theme">
         <span id="theme-icon">🌙</span> Dark Mode
       </button>
-    </div>
-  </footer>
+    </footer>
+  </div>
 
   <script src="/static/js/script.js"></script>
 </body>

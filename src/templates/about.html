@@ -80,64 +80,65 @@
         <ul class="nav-links">
             <li><a href="/">Home</a></li>
             <li><a href="/about" style="color: var(--text-primary);">About This Project</a></li>
-            <li><a href="https://github.com/Mounieshh/fake-news-detection-ai">GitHub</a></li>
+            <li><a href="https://github.com/Mounieshh/fake-news-detection" target="_blank">GitHub</a></li>
         </ul>
     </nav>
 
     <div class="bg-glow"></div>
 
-    <div class="container about-container">
-        <header class="about-header">
-            <h1 class="about-title">About the Project</h1>
-            <p>Combating misinformation with transparency and advanced AI.</p>
+    <div class="container" style="padding-top: 5rem;">
+        <header class="hero-section">
+            <h1 class="hero-title">About the <span class="hero-accent">Project</span></h1>
+            <p class="hero-subtitle">Combating misinformation with transparency and advanced AI.</p>
         </header>
 
-        <section class="about-section">
-            <h2 class="section-title">Overview</h2>
-            <p>
-                This Fake News Detection System is designed to help users verify the authenticity of news articles.
-                By analyzing text content or URLs, our AI model provides an assessment of whether the information is
-                likely real or fake.
-            </p>
-            <p>
-                The goal is to promote media literacy and reduce the spread of misinformation in the digital age.
-            </p>
-        </section>
+        <main class="card-section" style="max-width: 800px; text-align: left;">
+            <div class="card">
+                <section style="margin-bottom: 2.5rem;">
+                    <h2 class="prediction-value" style="font-size: 1.5rem; color: var(--accent-color); margin-bottom: 1rem;">Overview</h2>
+                    <p class="explanation-text">
+                        This Fake News Detection System is designed to help users verify the authenticity of news articles.
+                        By analyzing text content or URLs, our AI model provides an assessment of whether the information is
+                        likely real or fake.
+                    </p>
+                    <p class="explanation-text">
+                        The goal is to promote media literacy and reduce the spread of misinformation in the digital age.
+                    </p>
+                </section>
 
-        <section class="about-section">
-            <h2 class="section-title">How It Works</h2>
-            <p>
-                Users can input raw text or provide a link to a news article.
-                The system processes this input using Natural Language Processing (NLP) techniques and a trained
-                classification model.
-            </p>
-            <p>
-                The core prediction is powered by a BERT-based model, fine-tuned on extensive datasets of real and fake
-                news.
-                Additionally, we leverage Gemini AI for enhanced reasoning and explanation of the results.
-            </p>
-        </section>
+                <section style="margin-bottom: 2.5rem;">
+                    <h2 class="prediction-value" style="font-size: 1.5rem; color: var(--accent-color); margin-bottom: 1rem;">How It Works</h2>
+                    <p class="explanation-text">
+                        Users can input raw text or provide a link to a news article.
+                        The system processes this input using Natural Language Processing (NLP) techniques and a trained
+                        classification model.
+                    </p>
+                    <p class="explanation-text">
+                        The core prediction is powered by a BERT-based model, fine-tuned on extensive datasets of real and fake
+                        news. Advanced NLP techniques are used for enhanced reasoning and explanation of the results.
+                    </p>
+                </section>
 
-        <section class="about-section">
-            <h2 class="section-title">Tech Stack</h2>
-            <div class="tech-stack-grid">
-                <div class="tech-item">Python</div>
-                <div class="tech-item">Flask</div>
-                <div class="tech-item">TensorFlow / Keras</div>
-                <div class="tech-item">Google Gemini AI</div>
-                <div class="tech-item">BeautifulSoup</div>
-                <div class="tech-item">HTML5 / CSS3</div>
+                <section>
+                    <h2 class="prediction-value" style="font-size: 1.5rem; color: var(--accent-color); margin-bottom: 1rem;">Tech Stack</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                        <div style="background: var(--input-bg); padding: 1rem; border-radius: 12px; text-align: center; font-weight: 600; border: 1px solid var(--border-color);">Python</div>
+                        <div style="background: var(--input-bg); padding: 1rem; border-radius: 12px; text-align: center; font-weight: 600; border: 1px solid var(--border-color);">Flask</div>
+                        <div style="background: var(--input-bg); padding: 1rem; border-radius: 12px; text-align: center; font-weight: 600; border: 1px solid var(--border-color);">TensorFlow</div>
+                        <div style="background: var(--input-bg); padding: 1rem; border-radius: 12px; text-align: center; font-weight: 600; border: 1px solid var(--border-color);">BERT</div>
+                        <div style="background: var(--input-bg); padding: 1rem; border-radius: 12px; text-align: center; font-weight: 600; border: 1px solid var(--border-color);">NLP</div>
+                        <div style="background: var(--input-bg); padding: 1rem; border-radius: 12px; text-align: center; font-weight: 600; border: 1px solid var(--border-color);">Modern UI</div>
+                    </div>
+                </section>
             </div>
-        </section>
-    </div>
+        </main>
 
-    <footer class="footer">
-        <div class="theme-toggle-container">
+        <footer class="footer">
             <button id="theme-toggle" class="theme-switch" aria-label="Toggle Theme">
                 <span id="theme-icon">🌙</span> Dark Mode
             </button>
-        </div>
-    </footer>
+        </footer>
+    </div>
 
     <script src="/static/js/script.js"></script>
 </body>

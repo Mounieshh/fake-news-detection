@@ -23,7 +23,7 @@ class ImageFakeNewsModel:
             return {
                 "prediction": "ERROR",
                 "confidence": 0,
-                "explanation": self.error_message or "Image model backend is not initialized. Check .env file for NVIDIA_API_KEY.",
+                "explanation": self.error_message or "Trained model failed to predict. Model is not initialized.",
                 "meta": "Configuration Error"
             }
         
@@ -51,12 +51,12 @@ def predict(
     context: str = ""
 ) -> Dict[str, Any]:
     if not model or not model.is_loaded:
-        error_msg = model.error_message if model else "Image model is not initialized"
+        error_msg = model.error_message if model else "Trained model is not initialized"
         return {
             "prediction": "ERROR",
             "confidence": 0,
-            "explanation": error_msg or "Image model is not loaded. Check .env file for NVIDIA_API_KEY.",
-            "meta": "System Error"
+            "explanation": error_msg or "Trained model failed to predict. Model is not loaded.",
+            "meta": "Model Error"
         }
 
     return model.predict(image_bytes=image_bytes, mime_type=mime_type, context=context)

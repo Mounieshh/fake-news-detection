@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
-from src.prediction import GeminiPredictor
+from src.prediction import NewsPredictor
 from input_handlers.url_handler import URLHandler
 from image_predict.image_model import load_model as load_image_model, predict as predict_image
 import os
@@ -9,7 +9,7 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-predictor = GeminiPredictor()
+predictor = NewsPredictor()
 url_handler = URLHandler()
 image_model = load_image_model()
 

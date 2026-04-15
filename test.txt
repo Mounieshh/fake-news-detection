@@ -1,0 +1,19 @@
+# for text
+Apple reported quarterly revenue of $94.8 billion in its fiscal Q1 2024 earnings call, 
+with iPhone sales accounting for the majority of revenue. 
+CEO Tim Cook highlighted growth in services and the company's 
+expansion into emerging markets.
+
+
+Scientists at Harvard University have confirmed that drinking hot lemon water every morning for 7 days 
+completely cures Type 2 diabetes. The study, published last week, showed 100% success rate in over 10,000 patients. 
+Big Pharma is trying to suppress this information.
+
+
+
+#for url
+https://www.dqindia.com/news/oracle-layoffs-2026-12000-jobs-hit-in-india-severance-debate-grows-11700978
+
+# test url -> from times of india real news 
+https://timesofindia.indiatimes.com/india/timestopten/msid-94900958.cms
+
