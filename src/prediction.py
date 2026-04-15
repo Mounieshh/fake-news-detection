@@ -11,7 +11,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-NIM_API_KEY = "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"
+NIM_API_KEY = ""
 NIM_BASE_URL = "https://integrate.api.nvidia.com/v1"
 NIM_MODEL = "meta/llama-3.3-70b-instruct"
 
